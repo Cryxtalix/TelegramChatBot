@@ -28,7 +28,7 @@ async def incoming_message_handler(event):
                                 incoming_message_handler.context = "Hi! Let's chat!"
                                 await send_msg(sender.username, "[Session ended]")
                         else:
-                                response = requests.post(url="localhost:11434/api/generate", 
+                                response = requests.post(url = "http://localhost:11434/api/generate", 
                                                         json = {"model": "tinydolphin", 
                                                                 "stream": False, 
                                                                 "context":incoming_message_handler.context, 
