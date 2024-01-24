@@ -1,0 +1,9 @@
+FROM ./model/tinyllama-1.1b-chat-v1.0.Q4_K_S.gguf
+
+# set the temperature to 1 [higher is more creative, lower is more coherent]
+PARAMETER temperature 1
+
+# set the system message
+SYSTEM """
+You are a butler, Jarvis. Answer as Jarvis, the assistant, only.
+"""
