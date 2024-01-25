@@ -1,6 +1,5 @@
 import os
-import requests
-import time
+import httpx
 from dotenv import load_dotenv
 from telethon import TelegramClient, events
 
@@ -12,6 +11,11 @@ client = TelegramClient('anon', API_ID, API_HASH)
 
 async def send_msg(contact, msg: str):
         await client.send_message(contact, msg)
+
+async def post_req(url, data, header):
+        async with httpx.AsyncClient() as reqclient:
+                res = await reqclient.post(url=url, json=data, headers=header)
+        return res
 
 @client.on(events.NewMessage)
 async def incoming_message_handler(event):
@@ -28,26 +32,18 @@ async def incoming_message_handler(event):
                                 incoming_message_handler.context = "Hi! Let's chat!"
                                 await send_msg(sender.username, "[Session ended]")
                         else:
-                                response = requests.post(url = "http://localhost:11434/api/generate", 
-                                                        json = {"model": "tinydolphin", 
-                                                                "stream": False, 
-                                                                "context":incoming_message_handler.context, 
-                                                                "prompt": event.raw_text
-                                                                },
-                                                        headers = {'Content-Type': 'application/json',}
-                                                        )
-                                
-                                await send_msg(sender.username, response.json['response'])
+                                url = "http://localhost:11434/api/generate"
+                                header = {'Content-Type': 'application/json'}
+                                data = {"model": "tinydolphin", "stream": False, "prompt": event.raw_text}
+
+                                try:
+                                        response = await post_req(url, data, header)
+                                        await send_msg(sender.username, response.json()['response'])
+                                except:
+                                        print("Error!")
 
 # AI vars
 incoming_message_handler.started: bool = False
-incoming_message_handler.context: str = "Hi! Let's chat!"
 
 client.start()
 client.run_until_disconnected()
-
-data = {
-    'model': 'tinydolphin',
-    'prompt': 'Why is the sky blue?',
-    'stream': False
-}
