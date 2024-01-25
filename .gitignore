@@ -3,3 +3,5 @@
 *.session-journal
 model
 venv
+members.py
+test.py

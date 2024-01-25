@@ -1,7 +1,9 @@
 import os
 import httpx
+import time
 from dotenv import load_dotenv
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, functions, types
+from members import members
 
 load_dotenv()
 API_ID = os.getenv('api_id')
@@ -14,13 +16,13 @@ async def send_msg(contact, msg: str):
 
 async def post_req(url, data, header):
         async with httpx.AsyncClient() as reqclient:
-                res = await reqclient.post(url=url, json=data, headers=header)
+                res = await reqclient.post(url=url, json=data, headers=header, timeout=120.0)
         return res
 
 @client.on(events.NewMessage)
 async def incoming_message_handler(event):
         sender = await event.get_sender()
-        if sender.contact == True:
+        if sender.phone in members:
                 if incoming_message_handler.started == False:
                         if '/start' in event.raw_text:
                                 incoming_message_handler.started = True
@@ -38,9 +40,9 @@ async def incoming_message_handler(event):
 
                                 try:
                                         response = await post_req(url, data, header)
-                                        await send_msg(sender.username, response.json()['response'])
+                                        await send_msg(sender.phone, response.json()['response'])
                                 except:
-                                        print("Error!")
+                                        await send_msg(sender.phone, "Oops I seemed to have missed that. Please try again!")
 
 # AI vars
 incoming_message_handler.started: bool = False
